@@ -1,0 +1,15 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: medication-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/clinical}
+    redis:
+      host: ${DRUG_KNOWLEDGE_CACHE_HOST:localhost}
+      port: ${DRUG_KNOWLEDGE_CACHE_PORT:6379}
+
+translation:
+  base-url: ${TRANSLATION_BASE_URL:http://localhost:8085}

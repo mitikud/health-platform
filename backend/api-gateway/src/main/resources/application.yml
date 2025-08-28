@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+jwt:
+  # Choose ONE:
+  # If using RSA public key verification (recommended between services)
+#  mode: RSA
+  # Option A: provide the PEM itself from an env var (full PEM with headers)
+#  public-key-pem: ${JWT_PUBLIC_KEY:}
+  # Option B (alternative): load from a file mounted in the container
+#  public-key-path: ${JWT_PUBLIC_KEY_PATH:}
+
+  # If using HMAC (shared secret), switch mode to HMAC and set this:
+#  secret: ${JWT_SECRET:}
+  public-key: ${JWT_PUBLIC_KEY:}   # paste PEM or load from file/secret
+security:
+  permit:
+    - /api/auth/**                 # public: login/register
+    - /actuator/**

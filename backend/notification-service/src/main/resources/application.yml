@@ -1,0 +1,13 @@
+server:
+  port: 8086
+spring:
+  application:
+    name: notification-service
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:25}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASS:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true

@@ -1,0 +1,9 @@
+server:
+  port: 8085
+spring:
+  application:
+    name: translation-service
+  security:
+    user: # disable auth by permitting all via filter
+      name: dummy
+      password: dummy
