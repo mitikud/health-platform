@@ -18,6 +18,7 @@
         <module>translation-service</module>
         <module>notification-service</module>
         <module>report-service</module>
+        <module>commons-events</module>
     </modules>
 
     <properties>

@@ -10,6 +10,15 @@ spring:
     redis:
       host: ${DRUG_KNOWLEDGE_CACHE_HOST:localhost}
       port: ${DRUG_KNOWLEDGE_CACHE_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: medication-service
+      auto-offset-reset: earliest
+
+topics:
+  diagnosisSuggested: diagnosis.suggested
+  planCreated: meds.plan.created
 
 translation:
   base-url: ${TRANSLATION_BASE_URL:http://localhost:8085}
