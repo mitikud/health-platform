@@ -22,3 +22,7 @@ topics:
 
 translation:
   base-url: ${TRANSLATION_BASE_URL:http://localhost:8085}
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka

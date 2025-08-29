@@ -21,3 +21,7 @@ security:
   permit:
     - /api/auth/**                 # public: login/register
     - /actuator/**
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka

@@ -6,10 +6,8 @@ import com.medical.medicationservice.service.MedicationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/medications")
@@ -22,4 +20,12 @@ public class MedicationController {
     public ResponseEntity<MedicationResponse> recommend(@RequestBody @Valid MedicationRequest request) {
         return ResponseEntity.ok(medicationService.recommend(request));
     }
+
+    @PreAuthorize("hasRole('DOCTOR') or hasRole('PHARMACIST')")
+    @PostMapping("/{planId}/approve")
+    public ResponseEntity<Void> approve(@PathVariable String planId) { /* ... */ return ResponseEntity.ok().build(); }
+
+//    @PreAuthorize("hasRole('DOCTOR')")
+//    @PostMapping("/{planId}/revise")
+//    public ResponseEntity<Void> revise(@PathVariable String planId, @RequestBody ReviseDto dto) { /* ... */ return ResponseEntity.ok().build(); }
 }

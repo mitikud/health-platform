@@ -20,4 +20,8 @@ minio:
   bucket: ${MINIO_BUCKET:uploads}
 
 # (Optional) Kafka placeholders
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
 

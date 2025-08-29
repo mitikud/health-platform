@@ -7,3 +7,7 @@ spring:
     user: # disable auth by permitting all via filter
       name: dummy
       password: dummy
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
