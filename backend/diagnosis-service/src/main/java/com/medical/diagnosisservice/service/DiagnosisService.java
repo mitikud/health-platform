@@ -1,5 +1,6 @@
 package com.medical.diagnosisservice.service;
 
+import com.medical.diagnosisservice.common.events.DiagnosisSuggestedEvent;
 import com.medical.diagnosisservice.dto.DiagnosisResponse;
 import com.medical.diagnosisservice.model.DiagnosisRecord;
 import com.medical.diagnosisservice.repository.DiagnosisRepository;
@@ -8,6 +9,8 @@ import com.medical.diagnosisservice.service.storage.ObjectStorageService;
 import com.medical.diagnosisservice.service.stt.SttClient;
 import com.medical.diagnosisservice.util.Lang;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,11 +21,24 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class DiagnosisService {
 
+    private final KafkaTemplate<String, DiagnosisSuggestedEvent> template;
+
+    @Value("${topics.diagnosisSuggested:diagnosis.suggested}")
+    private String topic;
+
     private final DiagnosisRepository repository;
     private final OcrClient ocrClient;
     private final SttClient sttClient;
     private final ObjectStorageService storage;
 
+    //kafka
+    private void emitSuggested(String id, String diagnosis, double conf, String lang) {
+        var evt = DiagnosisSuggestedEvent.builder()
+                .requestId(id).diagnosis(diagnosis).confidence(conf)
+                .language(lang).timestamp(System.currentTimeMillis())
+                .build();
+        template.send(topic, id, evt);
+    }
     // Placeholder AI diagnosis logic
     private String inferDiagnosis(String normalizedText) {
         // TODO: call LLM/NLP model; return best-guess
