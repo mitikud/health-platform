@@ -73,6 +73,12 @@ services:
     networks: [backend]
 
   # ---- App Layer --------------------------------------------------------------
+  discovery-server:
+    build: ./backend/discovery-server
+    image: health/discovery-server:local
+    ports: [ "8761:8761" ]
+    networks: [ backend ]
+
   api-gateway:
     build: ./backend/api-gateway
     image: health/api-gateway:local
@@ -84,6 +90,7 @@ services:
       - translation-service
       - notification-service
       - report-service
+      - discovery-server
     environment:
       SERVER_PORT: 8080
       # If you're using service hostnames directly (no Eureka):
@@ -101,7 +108,7 @@ services:
   auth-service:
     build: ./backend/auth-service
     image: health/auth-service:local
-    depends_on: [ mysql, redis ]   # ← replace postgres with mysql
+    depends_on: [ mysql, redis, discovery-server ]   # ← replace postgres with mysql
     environment:
       SERVER_PORT: 8081
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-healthdb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -117,7 +124,7 @@ services:
   user-service:
     build: ./backend/user-service
     image: health/user-service:local
-    depends_on: [ mysql ]   # ← replace postgres
+    depends_on: [ mysql, discovery-server ]   # ← replace postgres
     environment:
       SERVER_PORT: 8082
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-healthdb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -131,7 +138,7 @@ services:
   diagnosis-service:
     build: ./backend/diagnosis-service
     image: health/diagnosis-service:local
-    depends_on: [kafka, mongo, minio]
+    depends_on: [kafka, mongo, minio, discovery-server]
     environment:
       SERVER_PORT: 8083
       SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/clinical
@@ -148,7 +155,7 @@ services:
   medication-service:
     build: ./backend/medication-service
     image: health/medication-service:local
-    depends_on: [kafka, mongo, redis]
+    depends_on: [kafka, mongo, redis, discovery-server]
     environment:
       SERVER_PORT: 8084
       SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/clinical
@@ -163,6 +170,7 @@ services:
   translation-service:
     build: ./backend/translation-service
     image: health/translation-service:local
+    depends_on: [discovery-server]
     environment:
       SERVER_PORT: 8085
       # If you proxy to external providers (optional placeholders):
@@ -175,7 +183,7 @@ services:
   notification-service:
     build: ./backend/notification-service
     image: health/notification-service:local
-    depends_on: [kafka]
+    depends_on: [kafka, discovery-server]
     environment:
       SERVER_PORT: 8086
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
@@ -193,7 +201,7 @@ services:
   report-service:
     build: ./backend/report-service
     image: health/report-service:local
-    depends_on: [mongo]
+    depends_on: [mongo, discovery-server]
     environment:
       SERVER_PORT: 8087
       SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/clinical

@@ -19,6 +19,8 @@
         <module>notification-service</module>
         <module>report-service</module>
         <module>commons-events</module>
+        <module>discovery-server</module>
+
     </modules>
 
     <properties>
