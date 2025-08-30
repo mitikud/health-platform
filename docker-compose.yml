@@ -219,6 +219,15 @@ services:
     depends_on: [api-gateway]
     networks: [backend]
 
+  frontend:
+    image: health/frontend:local
+    build:
+      context: ../frontend/react-app
+    depends_on: [ api-gateway ]
+    ports: [ "8088:80" ]  # open http://localhost:8088
+    networks: [ backend ]
+
+
 networks:
   backend:
 

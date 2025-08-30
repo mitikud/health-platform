@@ -1,0 +1,197 @@
+name: CD
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*.*.*" ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/cd.yml"
+
+env:
+  IMAGE_PREFIX: ${{ secrets.REGISTRY || 'ghcr.io' }}/${{ secrets.REGISTRY_OWNER || github.repository_owner }}/health
+  HELM_RELEASE: ${{ secrets.HELM_RELEASE || 'health' }}
+  NAMESPACE: ${{ secrets.NAMESPACE || 'health' }}
+
+jobs:
+  docker-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        svc: [
+          "api-gateway","auth-service","user-service","diagnosis-service",
+          "medication-service","translation-service","notification-service",
+          "report-service","discovery-server","config-server"
+        ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Registry Login (GHCR)
+        if: ${{ env.IMAGE_PREFIX startsWith('ghcr.io') }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Registry Login (custom)
+        if: ${{ ! (env.IMAGE_PREFIX startsWith('ghcr.io')) }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Compute tags
+        id: tags
+        shell: bash
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "sha=sha-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          if [[ "${GITHUB_REF}" == refs/heads/main ]]; then
+            echo "latest=latest" >> $GITHUB_OUTPUT
+          fi
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VER="${GITHUB_REF#refs/tags/v}"
+            echo "ver=${VER}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build & Push ${{ matrix.svc }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend/${{ matrix.svc }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.svc }}:${{ steps.tags.outputs.sha }}
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.svc }}:${{ steps.tags.outputs.latest }}
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.svc }}:${{ steps.tags.outputs.ver }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    needs: docker-publish
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Set Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${KUBE_CONFIG_DATA}" | base64 -d > ~/.kube/config
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+
+      - name: Helm deps
+        run: |
+          cd backend/helm
+          helm dependency update
+
+      - name: Helm upgrade (staging)
+        run: |
+          cd backend/helm
+          helm upgrade --install "${HELM_RELEASE}" . \
+            --namespace "${NAMESPACE}" --create-namespace \
+            --set api-gateway.image.repository=${IMAGE_PREFIX}/api-gateway \
+            --set api-gateway.image.tag=latest \
+            --set auth-service.image.repository=${IMAGE_PREFIX}/auth-service \
+            --set auth-service.image.tag=latest \
+            --set user-service.image.repository=${IMAGE_PREFIX}/user-service \
+            --set user-service.image.tag=latest \
+            --set diagnosis-service.image.repository=${IMAGE_PREFIX}/diagnosis-service \
+            --set diagnosis-service.image.tag=latest \
+            --set medication-service.image.repository=${IMAGE_PREFIX}/medication-service \
+            --set medication-service.image.tag=latest \
+            --set translation-service.image.repository=${IMAGE_PREFIX}/translation-service \
+            --set translation-service.image.tag=latest \
+            --set notification-service.image.repository=${IMAGE_PREFIX}/notification-service \
+            --set notification-service.image.tag=latest \
+            --set report-service.image.repository=${IMAGE_PREFIX}/report-service \
+            --set report-service.image.tag=latest \
+            --set discovery-server.image.repository=${IMAGE_PREFIX}/discovery-server \
+            --set discovery-server.image.tag=latest \
+            --set config-server.image.repository=${IMAGE_PREFIX}/config-server \
+            --set config-server.image.tag=latest
+
+        env:
+          IMAGE_PREFIX: ${{ env.IMAGE_PREFIX }}
+          HELM_RELEASE: ${{ env.HELM_RELEASE }}
+          NAMESPACE: ${{ env.NAMESPACE }}
+
+  deploy-prod:
+    needs: docker-publish
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Set Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${KUBE_CONFIG_DATA}" | base64 -d > ~/.kube/config
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+
+      - name: Extract version from tag
+        id: ver
+        run: echo "ver=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Helm deps
+        run: |
+          cd backend/helm
+          helm dependency update
+
+      - name: Helm upgrade (prod)
+        run: |
+          cd backend/helm
+          helm upgrade --install "${HELM_RELEASE}" . \
+            --namespace "${NAMESPACE}" --create-namespace \
+            --set api-gateway.image.repository=${IMAGE_PREFIX}/api-gateway \
+            --set api-gateway.image.tag=${{ steps.ver.outputs.ver }} \
+            --set auth-service.image.repository=${IMAGE_PREFIX}/auth-service \
+            --set auth-service.image.tag=${{ steps.ver.outputs.ver }} \
+            --set user-service.image.repository=${IMAGE_PREFIX}/user-service \
+            --set user-service.image.tag=${{ steps.ver.outputs.ver }} \
+            --set diagnosis-service.image.repository=${IMAGE_PREFIX}/diagnosis-service \
+            --set diagnosis-service.image.tag=${{ steps.ver.outputs.ver }} \
+            --set medication-service.image.repository=${IMAGE_PREFIX}/medication-service \
+            --set medication-service.image.tag=${{ steps.ver.outputs.ver }} \
+            --set translation-service.image.repository=${IMAGE_PREFIX}/translation-service \
+            --set translation-service.image.tag=${{ steps.ver.outputs.ver }} \
+            --set notification-service.image.repository=${IMAGE_PREFIX}/notification-service \
+            --set notification-service.image.tag=${{ steps.ver.outputs.ver }} \
+            --set report-service.image.repository=${IMAGE_PREFIX}/report-service \
+            --set report-service.image.tag=${{ steps.ver.outputs.ver }} \
+            --set discovery-server.image.repository=${IMAGE_PREFIX}/discovery-server \
+            --set discovery-server.image.tag=${{ steps.ver.outputs.ver }} \
+            --set config-server.image.repository=${IMAGE_PREFIX}/config-server \
+            --set config-server.image.tag=${{ steps.ver.outputs.ver }}
+            --set frontend.image.repository=${IMAGE_PREFIX}/frontend \
+            --set frontend.image.tag=latest \
+            --set frontend.image.repository=${IMAGE_PREFIX}/frontend \
+            --set frontend.image.tag=${{ steps.ver.outputs.ver }} \
+
+
+env:
+          IMAGE_PREFIX: ${{ env.IMAGE_PREFIX }}
+          HELM_RELEASE: ${{ env.HELM_RELEASE }}
+          NAMESPACE: ${{ env.NAMESPACE }}

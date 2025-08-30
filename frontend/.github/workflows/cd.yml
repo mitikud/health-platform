@@ -1,0 +1,7 @@
+strategy:
+  matrix:
+    svc: [
+      "api-gateway","auth-service","user-service","diagnosis-service",
+      "medication-service","translation-service","notification-service",
+      "report-service","discovery-server","config-server","frontend"  # <--- added
+    ]

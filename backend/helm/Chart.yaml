@@ -1,0 +1,41 @@
+apiVersion: v2
+name: health-platform
+description: Helm umbrella chart for multilingual AI health platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: api-gateway
+    version: 0.1.0
+    repository: "file://charts/api-gateway"
+  - name: auth-service
+    version: 0.1.0
+    repository: "file://charts/auth-service"
+  - name: user-service
+    version: 0.1.0
+    repository: "file://charts/user-service"
+  - name: diagnosis-service
+    version: 0.1.0
+    repository: "file://charts/diagnosis-service"
+  - name: medication-service
+    version: 0.1.0
+    repository: "file://charts/medication-service"
+  - name: translation-service
+    version: 0.1.0
+    repository: "file://charts/translation-service"
+  - name: notification-service
+    version: 0.1.0
+    repository: "file://charts/notification-service"
+  - name: report-service
+    version: 0.1.0
+    repository: "file://charts/report-service"
+  - name: discovery-server
+    version: 0.1.0
+    repository: "file://charts/discovery-server"
+  - name: config-server
+    version: 0.1.0
+    repository: "file://charts/config-server"
+  - name: frontend
+    version: 0.1.0
+    repository: "file://charts/frontend"

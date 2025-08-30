@@ -4,7 +4,20 @@ server:
 spring:
   application:
     name: api-gateway
-
+  gateway:
+    globalcors:
+      add-to-simple-url-handler-mapping: true
+      corsConfigurations:
+        '[/**]':
+          allowedOrigins:
+            - "https://health.example.com"       # SPA origin
+            - "https://app.example.com"          # if using dual-host
+            - "http://localhost:5173"            # dev vite preview
+          allowedMethods: [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ]
+          allowedHeaders: [ "*" ]
+          exposedHeaders: [ "Content-Disposition" ]
+          allowCredentials: true
+          maxAge: 3600
 jwt:
   # Choose ONE:
   # If using RSA public key verification (recommended between services)
