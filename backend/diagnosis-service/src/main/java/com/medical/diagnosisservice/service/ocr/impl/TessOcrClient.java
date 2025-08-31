@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 
-@Profile("prod")
-@Component
+//@Profile("prod")
+@Component("localOcr")  // @Profile("offline") for TessOcrClient
 public class TessOcrClient implements OcrClient {
     @Value("${ocr.tesseract.datapath:/tessdata}") private String dataPath;
     @Value("${ocr.tesseract.lang:eng}") private String lang; // add amh, tir traineddata as needed

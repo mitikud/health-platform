@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Profile("prod")
-@Component
+@Component("cloudLlm")
 public class OpenAiLlmClient implements LlmClient {
 
     @Value("${ai.openai.apiKey}") private String apiKey;

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 
-@Profile("prod")
-@Component
+@Profile({"prod"})
+@Component("cloudStt")
 @RequiredArgsConstructor
 public class WhisperSttClient implements SttClient {
 

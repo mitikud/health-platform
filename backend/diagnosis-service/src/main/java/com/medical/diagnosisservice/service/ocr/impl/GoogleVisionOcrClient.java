@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import java.io.InputStream;
 import java.util.List;
 
-@Profile("prod")
-@Component
+//@Profile("prod")
+@Component("cloudOcr")  // @Profile("prod") for GoogleVisionOcrClient
 public class GoogleVisionOcrClient implements OcrClient {
 
     @Value("#{'${ocr.vision.hints:en,am,ti}'.split(',')}")

@@ -4,8 +4,11 @@ import com.medical.medicationservice.dto.*;
 import com.medical.medicationservice.model.MedicationPlan;
 import com.medical.medicationservice.repository.MedicationPlanRepository;
 import com.medical.medicationservice.util.Lang;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -122,6 +125,10 @@ public class MedicationService {
                 .build();
     }
 
+    public MedicationPlan getPlan(String id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Medication plan not found: " + id));
+    }
     private List<String> translateAll(List<String> lines, String lang) {
         List<String> out = new ArrayList<>();
         for (String s : lines) out.add(localize(s, lang));

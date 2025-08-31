@@ -12,8 +12,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-@Profile("offline")
-@Component
+@Profile({"prod","offline","default"})
+@Component("localStt")
 public class VoskSttClient implements SttClient {
 
     @Value("${ai.vosk.modelPath}") private String modelPath;

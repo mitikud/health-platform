@@ -5,16 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bef814dc-9687-43d4-abb5-f3d139cac108" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/easycode.ignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/easycode/codebase-v2.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/controller/DiagnosisController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/controller/DiagnosisController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/dto/DiagnosisResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/dto/DiagnosisResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/DiagnosisService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/DiagnosisService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/OcrClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/OcrClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/translation-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/translation-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/LLM/impl/OpenAiLlmClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/LLM/impl/OpenAiLlmClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/impl/GoogleVisionOcrClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/impl/GoogleVisionOcrClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/impl/TessOcrClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/impl/TessOcrClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/router/GoogleVisionOcrClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/router/TessOcrClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/stt/impl/VoskSttClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/stt/impl/VoskSttClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/stt/impl/WhisperSttClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/stt/impl/WhisperSttClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/stt/router/VoskSttClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/stt/router/WhisperSttClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/medication-service/src/main/java/com/medical/medicationservice/controller/MedicationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/medication-service/src/main/java/com/medical/medicationservice/controller/MedicationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/medication-service/src/main/java/com/medical/medicationservice/service/MedicationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/medication-service/src/main/java/com/medical/medicationservice/service/MedicationService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +63,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "cicdhelm",
+    "git-widget-placeholder": "ai",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/mitea/Desktop/health-platform/backend/user-service",
     "node.js.detected.package.eslint": "true",
@@ -108,7 +111,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1756586554835</updated>
-      <workItem from="1756586558223" duration="13195000" />
+      <workItem from="1756586558223" duration="16481000" />
     </task>
     <servers />
   </component>

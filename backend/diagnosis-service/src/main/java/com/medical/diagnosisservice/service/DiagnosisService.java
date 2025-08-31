@@ -7,10 +7,13 @@ import com.medical.diagnosisservice.dto.DiagnosisResponse;
 import com.medical.diagnosisservice.model.DiagnosisRecord;
 import com.medical.diagnosisservice.repository.DiagnosisRepository;
 import com.medical.diagnosisservice.service.LLM.LlmClient;
+import com.medical.diagnosisservice.service.LLM.router.LlmRouter;
 import com.medical.diagnosisservice.service.audio.AudioPreprocessor;
 import com.medical.diagnosisservice.service.ocr.OcrClient;
+import com.medical.diagnosisservice.service.ocr.router.OcrRouter;
 import com.medical.diagnosisservice.service.storage.ObjectStorageService;
 import com.medical.diagnosisservice.service.stt.SttClient;
+import com.medical.diagnosisservice.service.stt.router.SttRouter;
 import com.medical.diagnosisservice.util.Lang;
 import com.medical.diagnosisservice.util.ProcessingMode;
 
@@ -206,6 +209,7 @@ public DiagnosisResponse analyzeText(String text, String lang, ProcessingMode mo
     String normalized = text == null ? "" : text.trim();
     DiagnosisPayload payload = inferDiagnosis(normalized, lang);
     double confidence = 0.6;
+    LlmRouter.setMode(mode);
 
     DiagnosisRecord rec = DiagnosisRecord.builder()
             .inputType("text")
@@ -302,9 +306,11 @@ public DiagnosisResponse analyzeText(String text, String lang, ProcessingMode mo
 //            throw new RuntimeException("Audio analyze failed", e);
 //        }
 //    }
-public DiagnosisResponse analyzeAudio(MultipartFile audio, String lang) {
+public DiagnosisResponse analyzeAudio(MultipartFile audio, String lang, ProcessingMode mode) {
     File wav = null;
     try {
+        SttRouter.setMode(mode);
+        LlmRouter.setMode(mode);
         // 1) normalize
         wav = audioPreprocessor.toPcm16kWav(audio);
 
@@ -381,8 +387,10 @@ public DiagnosisResponse analyzeAudio(MultipartFile audio, String lang) {
 //        }
 //    }
 
-    public DiagnosisResponse analyzeImage(MultipartFile image, String lang) {
-        try {
+    public DiagnosisResponse analyzeImage(MultipartFile image, String lang, ProcessingMode mode) {
+
+        OcrRouter.setMode(mode);
+        LlmRouter.setMode(mode);try {
             byte[] bytes = image.getBytes(); // read once
             // upload
             try (InputStream up = new ByteArrayInputStream(bytes)) {
