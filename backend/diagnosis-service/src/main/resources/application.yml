@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: diagnosis-service
+  profiles:
+    group:
+      offline: offline
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/clinical}
@@ -24,4 +27,16 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery-server:8761/eureka
+
+#ai:
+#  openai:
+#    apiKey: ${OPENAI_API_KEY:}
+#    whisper:
+#      model: gpt-4o-mini-transcribe
+
+ai:
+  vosk:
+    modelPath: ${VOSK_MODEL_PATH:/models/en}    # change per language
+    sampleRate: 16000
+
 

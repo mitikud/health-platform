@@ -5,22 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bef814dc-9687-43d4-abb5-f3d139cac108" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/easycode.ignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/easycode/codebase-v2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/health-platform.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/health-platform.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/easycode.ignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/easycode/codebase-v2.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/controller/DiagnosisController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/controller/DiagnosisController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/dto/DiagnosisResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/dto/DiagnosisResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/DiagnosisService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/DiagnosisService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/OcrClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/java/com/medical/diagnosisservice/service/ocr/OcrClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/diagnosis-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/diagnosis-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/translation-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/translation-service/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -53,7 +59,8 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "discovery",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "cicdhelm",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/mitea/Desktop/health-platform/backend/user-service",
     "node.js.detected.package.eslint": "true",
@@ -101,7 +108,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1756586554835</updated>
-      <workItem from="1756586558223" duration="2315000" />
+      <workItem from="1756586558223" duration="13195000" />
     </task>
     <servers />
   </component>
