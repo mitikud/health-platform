@@ -7,8 +7,11 @@ import { Input } from '../components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { ResultCard } from '../components/ResultCard'
 import { Howl } from 'howler'
+import LoadingButton from '../components/LoadingButton'
+import { toast } from "../components/ui/sonner";
 // import Recorder from '../components/Recorder'
-import RecorderWave  from '../components/RecorderWave'
+// import RecorderWave  from '../components/RecorderWave'
+import RecorderWave from '../components/RecorderWave'
 
 type DiagnosisPayload = { possible: string[]; recommendations: string[] }
 type DiagnosisResponse = {
@@ -29,39 +32,93 @@ export default function DiagnosePage() {
 
   const [recordedFile, setRecordedFile] = useState<File | null>(null)
 
+  
+
   const lang = i18n.language
+  const speechLocale = lang === 'am' ? 'am-ET' : lang === 'ti' ? 'ti-ER' : 'en-US'
+
+  const mode = (lang === 'am' || lang === 'ti') ? 'CLOUD' : 'AUTO'
+const headers = { 'Content-Type': 'multipart/form-data', 'X-Processing-Mode': mode }
+
+  // const analyzeText = async () => {
+  //   setBusy(true)
+  //   try {
+  //     const res = await api.post('/diagnosis/analyze', { text, preferredLang: lang })
+  //     setResult(res.data)
+  //   } finally { setBusy(false) }
+  // }
 
   const analyzeText = async () => {
-    setBusy(true)
-    try {
-      const res = await api.post('/diagnosis/analyze', { text, preferredLang: lang })
-      setResult(res.data)
-    } finally { setBusy(false) }
-  }
+  if (!text.trim()) { toast.info("Please enter symptoms"); return }
+  setBusy(true)
+  const t = toast.loading("Analyzing text…")
+  try {
+    const res = await api.post('/diagnosis/analyze', { text, preferredLang: lang })
+    setResult(res.data)
+    toast.success("Analysis ready", { id: t })
+  } catch (e:any) {
+    toast.error(e?.response?.data?.message || "Failed to analyze text", { id: t })
+  } finally { setBusy(false) }
+}
 
-  const analyzeAudio = async () => {
-    if (!audioRef.current) return
+  const analyzeAudio = async ()=>{
+    const file = recordedFile ?? audioRef.current
+    if (!file) { toast.info("Record or choose an audio file"); return }
     setBusy(true)
+    const t = toast.loading("Uploading audio…")
     try {
       const fd = new FormData()
-      fd.append('audio', audioRef.current)
-      fd.append('lang', lang)
-      const res = await api.post('/diagnosis/analyze-audio', fd, { headers: { 'Content-Type':'multipart/form-data' } })
+      fd.append('audio', file)
+      fd.append('lang', lang)        // keep existing
+      fd.append('locale', speechLocale)  // NEW: tells backend STT which language to use
+      // STEP 2 will add locale here
+      // const res = await api.post('/diagnosis/analyze-audio', fd, { headers: { 'Content-Type':'multipart/form-data' } })
+      const res= await api.post('/diagnosis/analyze-audio', fd, { headers })
       setResult(res.data)
+      toast.success("Audio analyzed", { id: t })
+    } catch (e:any) {
+      toast.error(e?.response?.data?.message || "Audio analysis failed", { id: t })
     } finally { setBusy(false) }
   }
+  // const analyzeAudio = async () => {
+  //   if (!audioRef.current) return
+  //   setBusy(true)
+  //   try {
+  //     const fd = new FormData()
+  //     fd.append('audio', audioRef.current)
+  //     fd.append('lang', lang)
+  //     const res = await api.post('/diagnosis/analyze-audio', fd, { headers: { 'Content-Type':'multipart/form-data' } })
+  //     setResult(res.data)
+  //   } finally { setBusy(false) }
+  // }
 
-  const analyzeImage = async () => {
-    if (!imageRef.current) return
-    setBusy(true)
-    try {
-      const fd = new FormData()
-      fd.append('image', imageRef.current)
-      fd.append('lang', lang)
-      const res = await api.post('/diagnosis/analyze-image', fd, { headers: { 'Content-Type':'multipart/form-data' } })
-      setResult(res.data)
-    } finally { setBusy(false) }
-  }
+  // const analyzeImage = async () => {
+  //   if (!imageRef.current) return
+  //   setBusy(true)
+  //   try {
+  //     const fd = new FormData()
+  //     fd.append('image', imageRef.current)
+  //     fd.append('lang', lang)
+  //     const res = await api.post('/diagnosis/analyze-image', fd, { headers: { 'Content-Type':'multipart/form-data' } })
+  //     setResult(res.data)
+  //   } finally { setBusy(false) }
+  // }
+const analyzeImage = async () => {
+  if (!imageRef.current) { toast.info("Choose a prescription photo"); return }
+  setBusy(true)
+  const t = toast.loading("Uploading image…")
+  try {
+    const fd = new FormData()
+    fd.append('image', imageRef.current)
+    fd.append('lang', lang)
+    fd.append('locale', speechLocale)  // NEW: tells backend STT which language to use
+    const res = await api.post('/diagnosis/analyze-image', fd, { headers: { 'Content-Type':'multipart/form-data' } })
+    setResult(res.data)
+    toast.success("Image analyzed", { id: t })
+  } catch (e:any) {
+    toast.error(e?.response?.data?.message || "Image analysis failed", { id: t })
+  } finally { setBusy(false) }
+}
 
   const speak = async () => {
     if (!result) return
@@ -121,12 +178,16 @@ export default function DiagnosePage() {
 
 <TabsContent value="audio" className="space-y-3">
   <RecorderWave onStop={(f)=> setRecordedFile(f)} />
+    
   <div className="text-xs text-muted-foreground">
     {recordedFile ? `Ready: ${recordedFile.name} (${Math.round(recordedFile.size/1024)} KB)` : 'Record, then Submit'}
   </div>
+  <div className="text-xs text-muted-foreground">
+  Speech locale: <span className="font-mono">{speechLocale}</span>
+</div>
   <Input type="file" accept="audio/*" onChange={e=> (audioRef.current = e.target.files?.[0] ?? null)} />
   <div className="flex justify-end">
-    <Button
+    {/* <Button
       onClick={async ()=>{
         const file = recordedFile ?? audioRef.current
         if (!file) return
@@ -142,14 +203,30 @@ export default function DiagnosePage() {
       disabled={busy || (!recordedFile && !audioRef.current)}
     >
       {t('submit')}
-    </Button>
+    </Button> */}
+    <LoadingButton
+  onClick={analyzeAudio}
+  loading={busy}
+  disabled={(!recordedFile && !audioRef.current)}
+>
+  {t('submit')}
+</LoadingButton>
+
   </div>
 </TabsContent>
 
           <TabsContent value="image" className="space-y-3">
             <Input type="file" accept="image/*" onChange={e=> imageRef.current = e.target.files?.[0] ?? null} />
             <div className="flex justify-end">
-              <Button onClick={analyzeImage} disabled={busy || !imageRef.current}>{t('submit')}</Button>
+              {/* <Button onClick={analyzeImage} disabled={busy || !imageRef.current}>{t('submit')}</Button> */}
+              <LoadingButton
+  onClick={analyzeImage}
+  loading={busy}
+  disabled={busy || !imageRef.current}
+>
+  {t('submit')}
+</LoadingButton>
+
             </div>
           </TabsContent>
         </Tabs>

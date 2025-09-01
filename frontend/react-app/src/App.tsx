@@ -8,6 +8,8 @@ import DiagnosePage from './pages/DiagnosePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import MedicationPage from './pages/MedicationPage'
+import { Toaster } from "./components/ui/sonner";
+
 
 export default function App() {
   const { t } = useTranslation()
@@ -48,6 +50,7 @@ export default function App() {
       <footer className="border-t py-6 text-center text-sm text-muted-foreground">
         <div className="container">&copy; {new Date().getFullYear()} · {t('app_name')}</div>
       </footer>
+      <Toaster richColors closeButton />
     </div>
   )
 }

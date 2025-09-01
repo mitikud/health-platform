@@ -4,6 +4,9 @@ import api from '../lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Pill } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import LoadingButton from '../components/LoadingButton'
+import { toast } from "../components/ui/sonner";
 
 type Interaction = { with: string; severity: string; mechanism: string; action: string }
 type Item = {
@@ -28,6 +31,9 @@ export default function MedicationPage() {
   const [plan, setPlan] = useState<Plan | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const [downloading, setDownloading] = useState(false)
+
+
   useEffect(() => {
     const run = async () => {
       if (!planId) return
@@ -43,6 +49,54 @@ export default function MedicationPage() {
   if (!planId) return <div className="text-muted-foreground">No planId in URL.</div>
   if (loading) return <div className="text-muted-foreground">Loading plan…</div>
   if (!plan) return <div className="text-muted-foreground">Plan not found.</div>
+
+  const downloadPdf = async ()=>{
+      if (!plan) return
+      setDownloading(true)
+      const t = toast.loading("Generating PDF…")
+      try {
+        const meds = plan.items.map(it => `${it.drug} — ${it.dose}`)
+        const body = {
+          userId: "current-user",
+          language: plan.language || "en",
+          diagnosis: plan.freeTextDiagnosis || (plan.diagnosisCodes?.join(", ") || ""),
+          medications: meds,
+          notes: "Auto-generated summary. Educational only."
+        }
+        const res = await api.post('/reports/generate', body, { responseType: 'blob' })
+        const blob = new Blob([res.data], { type: 'application/pdf' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url; a.download = `health-summary-${plan.id}.pdf`
+        document.body.appendChild(a); a.click(); a.remove()
+        URL.revokeObjectURL(url)
+        toast.success("PDF downloaded", { id: t })
+      } catch (e:any) {
+        toast.error(e?.response?.data?.message || "PDF generation failed", { id: t })
+      } finally { setDownloading(false) }
+    }
+//   const downloadPdf = async () => {
+//   if (!plan) return
+//   // Build a human-friendly meds list for the report
+//   const meds = plan.items.map(it => `${it.drug} — ${it.dose}`)
+//   const body = {
+//     userId: "current-user",               // replace with actual user id if you have it
+//     language: plan.language || "en",
+//     diagnosis: plan.freeTextDiagnosis || (plan.diagnosisCodes?.join(", ") || ""),
+//     medications: meds,
+//     notes: "Auto-generated summary. Educational only."
+//   }
+//   const res = await api.post('/reports/generate', body, { responseType: 'blob' })
+//   const blob = new Blob([res.data], { type: 'application/pdf' })
+//   const url = URL.createObjectURL(blob)
+//   const a = document.createElement('a')
+//   a.href = url
+//   a.download = `health-summary-${plan.id}.pdf`
+//   document.body.appendChild(a)
+//   a.click()
+//   a.remove()
+//   URL.revokeObjectURL(url)
+// }
 
   return (
     <div className="space-y-6">
@@ -73,6 +127,18 @@ export default function MedicationPage() {
                 <Badge>risk {(it.riskScore*100|0)}%</Badge>
               </CardTitle>
             </CardHeader>
+            <div className="flex gap-2">
+              {/* <Button onClick={downloadPdf}>Download PDF</Button> */}
+              <div className="flex gap-2">
+  <LoadingButton
+    onClick={downloadPdf}
+    loading={downloading}
+  >
+    Download PDF
+  </LoadingButton>
+</div>
+
+            </div>
             <CardContent className="space-y-2">
               <div><b>Dose:</b> {it.dose}</div>
               <div><b>Rationale:</b> {it.rationale}</div>
