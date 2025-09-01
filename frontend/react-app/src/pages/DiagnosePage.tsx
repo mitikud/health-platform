@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '../lib/api'
 import { Button } from '../components/ui/button'
@@ -12,6 +12,12 @@ import { toast } from "../components/ui/sonner";
 // import Recorder from '../components/Recorder'
 // import RecorderWave  from '../components/RecorderWave'
 import RecorderWave from '../components/RecorderWave'
+
+import UploadProgress from '../components/UploadProgress'
+import { useSmartProgress } from '../hooks/useSmartProgress'
+
+import SpeechLanguageSelect from '../components/SpeechLanguageSelect'
+
 
 type DiagnosisPayload = { possible: string[]; recommendations: string[] }
 type DiagnosisResponse = {
@@ -32,13 +38,31 @@ export default function DiagnosePage() {
 
   const [recordedFile, setRecordedFile] = useState<File | null>(null)
 
-  
+  const audioProg = useSmartProgress()
+  const imageProg = useSmartProgress()
+
 
   const lang = i18n.language
-  const speechLocale = lang === 'am' ? 'am-ET' : lang === 'ti' ? 'ti-ER' : 'en-US'
+  // const speechLocale = lang === 'am' ? 'am-ET' : lang === 'ti' ? 'ti-ER' : 'en-US'
 
-  const mode = (lang === 'am' || lang === 'ti') ? 'CLOUD' : 'AUTO'
-const headers = { 'Content-Type': 'multipart/form-data', 'X-Processing-Mode': mode }
+  
+
+const [speechLocale, setSpeechLocale] = useState(
+  i18n.language === 'am' ? 'am-ET' : i18n.language === 'ti' ? 'ti-ER' : 'en-US'
+)
+
+// const mode = (lang === 'am' || lang === 'ti') ? 'CLOUD' : 'AUTO'
+  const mode = (speechLocale.startsWith('am') || speechLocale.startsWith('ti')) ? 'CLOUD' : 'AUTO'
+  const headers = { 'Content-Type': 'multipart/form-data', 'X-Processing-Mode': mode }
+
+useEffect(() => {
+  // keep default in sync when user flips UI language (but don't override manual choice)
+  setSpeechLocale(prev => {
+    const auto = i18n.language === 'am' ? 'am-ET' : i18n.language === 'ti' ? 'ti-ER' : 'en-US'
+    // if user hasn’t touched it (still same family), adjust; else keep
+    return (prev.startsWith('en') || prev.startsWith('am') || prev.startsWith('ti')) ? auto : prev
+  })
+}, [i18n.language])
 
   // const analyzeText = async () => {
   //   setBusy(true)
@@ -65,6 +89,7 @@ const headers = { 'Content-Type': 'multipart/form-data', 'X-Processing-Mode': mo
     const file = recordedFile ?? audioRef.current
     if (!file) { toast.info("Record or choose an audio file"); return }
     setBusy(true)
+    audioProg.start()
     const t = toast.loading("Uploading audio…")
     try {
       const fd = new FormData()
@@ -73,11 +98,27 @@ const headers = { 'Content-Type': 'multipart/form-data', 'X-Processing-Mode': mo
       fd.append('locale', speechLocale)  // NEW: tells backend STT which language to use
       // STEP 2 will add locale here
       // const res = await api.post('/diagnosis/analyze-audio', fd, { headers: { 'Content-Type':'multipart/form-data' } })
-      const res= await api.post('/diagnosis/analyze-audio', fd, { headers })
+      // const res= await api.post('/diagnosis/analyze-audio', fd, { headers })
+      
+      // const res = await api.post('/diagnosis/analyze-audio', fd, {
+      //   headers: { 'Content-Type':'multipart/form-data' },
+      //   onUploadProgress: (e) => audioProg.update(e.loaded, e.total)
+      // })
+      const res = await api.post('/diagnosis/analyze-audio', fd, {
+  headers: { 'Content-Type':'multipart/form-data', 'X-Processing-Mode': mode },
+  onUploadProgress: (e)=> audioProg.update(e.loaded, e.total)
+})
+
+
+      audioProg.done()
+
       setResult(res.data)
       toast.success("Audio analyzed", { id: t })
     } catch (e:any) {
       toast.error(e?.response?.data?.message || "Audio analysis failed", { id: t })
+
+      audioProg.done()
+
     } finally { setBusy(false) }
   }
   // const analyzeAudio = async () => {
@@ -106,24 +147,36 @@ const headers = { 'Content-Type': 'multipart/form-data', 'X-Processing-Mode': mo
 const analyzeImage = async () => {
   if (!imageRef.current) { toast.info("Choose a prescription photo"); return }
   setBusy(true)
+  imageProg.start()
   const t = toast.loading("Uploading image…")
   try {
     const fd = new FormData()
     fd.append('image', imageRef.current)
     fd.append('lang', lang)
     fd.append('locale', speechLocale)  // NEW: tells backend STT which language to use
-    const res = await api.post('/diagnosis/analyze-image', fd, { headers: { 'Content-Type':'multipart/form-data' } })
+    // const res = await api.post('/diagnosis/analyze-image', fd, { headers: { 'Content-Type':'multipart/form-data' } })
+    
+    const res = await api.post('/diagnosis/analyze-image', fd, {
+      headers: { 'Content-Type':'multipart/form-data' },
+      onUploadProgress: (e) => imageProg.update(e.loaded, e.total)
+    })
+    imageProg.done()
+    
     setResult(res.data)
     toast.success("Image analyzed", { id: t })
   } catch (e:any) {
     toast.error(e?.response?.data?.message || "Image analysis failed", { id: t })
+    imageProg.done()
   } finally { setBusy(false) }
 }
 
   const speak = async () => {
     if (!result) return
     const text = [...(result.analysis?.possible || []), ...(result.analysis?.recommendations || [])].join('. ')
-    const locale = lang === 'am' ? 'am-ET' : lang === 'ti' ? 'ti-ER' : 'en-US'
+    // const locale = lang === 'am' ? 'am-ET' : lang === 'ti' ? 'ti-ER' : 'en-US'
+    
+    const locale = speechLocale // was derived; now use the explicit selection
+
     const url = `/api/tts/speak?text=${encodeURIComponent(text)}&lang=${encodeURIComponent(locale)}`
     const sound = new Howl({ src: [url], html5: true })
     sound.play()
@@ -174,6 +227,7 @@ const analyzeImage = async () => {
     </Button>
   </div>
 </TabsContent> */}
+<SpeechLanguageSelect value={speechLocale} onChange={setSpeechLocale} />
 
 
 <TabsContent value="audio" className="space-y-3">
@@ -185,6 +239,9 @@ const analyzeImage = async () => {
   <div className="text-xs text-muted-foreground">
   Speech locale: <span className="font-mono">{speechLocale}</span>
 </div>
+
+<UploadProgress pct={audioProg.pct} showing={audioProg.visible} label="Uploading audio…" />
+
   <Input type="file" accept="audio/*" onChange={e=> (audioRef.current = e.target.files?.[0] ?? null)} />
   <div className="flex justify-end">
     {/* <Button
@@ -207,7 +264,8 @@ const analyzeImage = async () => {
     <LoadingButton
   onClick={analyzeAudio}
   loading={busy}
-  disabled={(!recordedFile && !audioRef.current)}
+  // disabled={(!recordedFile && !audioRef.current)}
+  disabled={busy || (!recordedFile && !audioRef.current)}
 >
   {t('submit')}
 </LoadingButton>
